@@ -1,3 +1,1 @@
-Alfabeto código: ['0', '1']
-Longitudes de las palabras: [4, 4, 3, 2, 3, 4, 3, 3]
-El código NO es instantáneo: una palabra es prefijo de otra.
+e hh f d c c b f e b b b f d a hh d f a d e c e d b e b b a e e g ha hf b g f d f f a f a g d g b b g f b hb e hf e f e a g hf c d hg e c e d f c b b g a d f f c hc b hb b d a b hg hd e f a c d hh a hg hg c d b c a b he e c c b g f e a b e g g g d b hb hb f e b d f hb a a f b a b f a d e d hb c g hg d c g b g g a g ha e ha f a g e c hf c d a b e a a e e f a c d c g c e c hd e a hg hg g b g d c f c g b f hb e e d e a a g b d g d b d g d b d a e f e f hf g he b a e a hh c b b ha f a a e b e c b d d g f c g d d e he a hg d e hh f a hf b a d a f c d e c c g hf e e f c e d f f g hg b d g f g f f hd c hd c a g a b e f c ha f a e b f d hg e
