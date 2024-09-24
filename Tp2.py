@@ -1,6 +1,31 @@
 import sys
 import os
+import math
+import random
 from collections import Counter
+
+# Función para generar un mensaje de N símbolos usando Montecarlo
+def generar_mensaje_aleatorio(palabras, probabilidades, N):
+    mensaje = random.choices(palabras, weights=probabilidades, k=N)
+    return ' '.join(mensaje)
+
+
+# Función para calcular la entropía de la fuente
+def calcular_entropia(probabilidades, base):
+    entropia = -sum(p * math.log(p, base) for p in probabilidades)
+    return entropia
+
+# Función para calcular la longitud media del código
+def calcular_longitud_media(probabilidades, longitudes):
+    longitud_media = sum(p * l for p, l in zip(probabilidades, longitudes))
+    return longitud_media
+
+
+# Función para calcular las probabilidades de un código compacto
+def calcular_probabilidades_compacto(longitudes, r):
+    probabilidades = [r ** -l for l in longitudes]
+    sum_probabilidades = sum(probabilidades)
+    return probabilidades, sum_probabilidades
 
 # Función para verificar la inecuación de Kraft-McMillan
 def verificar_kraft_mcmillan(longitudes):
@@ -43,6 +68,30 @@ def procesar_archivo(input_file, output_file=None, N=None):
     # Verificar la propiedad de prefijo
     cumple_prefijo = verificar_prefijo(palabras)
 
+    # Determinar si puede conformar un código compacto
+    r = len(alfabeto_codigo)  # número de símbolos en el alfabeto
+    probabilidades, suma_probabilidades = calcular_probabilidades_compacto(longitudes, r)
+
+    if math.isclose(suma_probabilidades, 1, rel_tol=1e-9):
+        print("El código puede ser compacto.")
+        print(f"Probabilidades: {probabilidades}")
+
+        # Calcular la entropía de la fuente
+        entropia = calcular_entropia(probabilidades, r)
+        print(f"Entropía de la fuente: {entropia}")
+
+        # Calcular la longitud media del código
+        longitud_media = calcular_longitud_media(probabilidades, longitudes)
+        print(f"Longitud media del código: {longitud_media}")
+
+        # Generar un mensaje de N símbolos codificados si N es proporcionado
+        if N:
+            mensaje_aleatorio = generar_mensaje_aleatorio(palabras, probabilidades, N)
+            print(f"Mensaje generado aleatoriamente: {mensaje_aleatorio}")
+    else:
+        print("El código NO puede ser compacto.")
+        print(f"Suma de las probabilidades: {suma_probabilidades}")
+
     if cumple_kraft and cumple_prefijo:
         print("El código cumple con la inecuación de Kraft-McMillan y es instantáneo (no tiene prefijos).")
     elif not cumple_kraft:
@@ -50,18 +99,16 @@ def procesar_archivo(input_file, output_file=None, N=None):
     elif not cumple_prefijo:
         print("El código NO es instantáneo: una palabra es prefijo de otra.")
 
-    # Si se proporciona un archivo de salida, escribir el resultado en ese archivo
-    if output_file:
-        with open(output_file, 'w') as f:
-            f.write(f"Alfabeto código: {sorted(alfabeto_codigo)}\n")
-            f.write(f"Longitudes de las palabras: {longitudes}\n")
-            if cumple_kraft and cumple_prefijo:
-                f.write("El código cumple con la inecuación de Kraft-McMillan y es instantáneo (no tiene prefijos).\n")
-            elif not cumple_kraft:
-                f.write("El código NO cumple con la inecuación de Kraft-McMillan.\n")
-            elif not cumple_prefijo:
-                f.write("El código NO es instantáneo: una palabra es prefijo de otra.\n")
-        print(f"Resultado guardado en '{output_file}'.")
+    # Si se proporciona un archivo de salida y se ha generado un mensaje aleatorio, escribir solo el mensaje en el archivo
+    if output_file and N:
+        mensaje_aleatorio = generar_mensaje_aleatorio(palabras, probabilidades, N)
+        try:
+            with open(output_file, 'w') as f:
+                f.write(mensaje_aleatorio)
+            print(f"Mensaje generado y guardado en '{output_file}'.")
+        except IOError:
+            print(f"Error: No se pudo escribir en el archivo {output_file}.")
+            sys.exit(1)
 
 def main():
     os.system("cls" if os.name == "nt" else "clear")
