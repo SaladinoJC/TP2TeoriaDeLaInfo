@@ -2,7 +2,7 @@ import sys
 import os
 import math
 import random
-from collections import Counter
+
 
 
 def generar_mensaje_aleatorio(palabras, probabilidades, N):
