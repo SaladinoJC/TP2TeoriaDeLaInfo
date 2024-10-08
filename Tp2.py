@@ -3,8 +3,6 @@ import os
 import math
 import random
 
-
-
 def generar_mensaje_aleatorio(palabras, probabilidades, N):
     # Calcula la distribución acumulada
     distribucion_acumulada = []
@@ -25,7 +23,8 @@ def generar_mensaje_aleatorio(palabras, probabilidades, N):
                 mensaje.append(palabras[i])
                 break
 
-    return " ".join(mensaje)
+    # Retorna el mensaje sin espacios entre las palabras
+    return "".join(mensaje)
 
 
 # Función para calcular la entropía de la fuente
@@ -48,8 +47,8 @@ def calcular_probabilidades_compacto(longitudes, r):
 
 
 # Función para verificar la inecuación de Kraft-McMillan
-def verificar_kraft_mcmillan(longitudes):
-    sumatoria = sum(2 ** (-l) for l in longitudes)
+def verificar_kraft_mcmillan(longitudes, r):
+    sumatoria = sum(r ** (-l) for l in longitudes)
     return sumatoria <= 1
 
 
@@ -84,21 +83,35 @@ def procesar_archivo(input_file, output_file=None, N=None):
     longitudes = [len(palabra) for palabra in palabras]
     print(f"Longitudes de las palabras: {longitudes}")
 
-    # Verifica si cumple la inecuación de Kraft-McMillan
-    cumple_kraft = verificar_kraft_mcmillan(longitudes)
+    # Verifica si cumple la inecuación de Kraft-McMillan usando el tamaño del alfabeto
+    r = len(alfabeto_codigo)
+    cumple_kraft = verificar_kraft_mcmillan(longitudes, r)
 
     # Verifica la propiedad de prefijo
     cumple_prefijo = verificar_prefijo(palabras)
 
+    # Si no cumple con Kraft-McMillan o la propiedad de prefijo, informar y terminar
+    if not cumple_kraft:
+        print("El código NO cumple con la inecuación de Kraft-McMillan. El código no es instantáneo.")
+        return
+
+    if not cumple_prefijo:
+        print("El código NO es instantáneo: una palabra es prefijo de otra.")
+        return
+
+    # Si el código es instantáneo, continuar con los cálculos
+    print("El código cumple con la inecuación de Kraft-McMillan y es instantáneo.")
+
     # Determina si puede conformar un código compacto
-    r = len(alfabeto_codigo)
-    probabilidades, suma_probabilidades = calcular_probabilidades_compacto(
-        longitudes, r
-    )
+    probabilidades, suma_probabilidades = calcular_probabilidades_compacto(longitudes, r)
 
     if math.isclose(suma_probabilidades, 1, rel_tol=1e-9):
         print("El código puede ser compacto.")
-        print(f"Probabilidades: {probabilidades}")
+        
+        # Mostrar las probabilidades asociadas a cada palabra
+        print("Probabilidades asociadas a cada palabra:")
+        for palabra, probabilidad in zip(palabras, probabilidades):
+            print(f"Palabra: {palabra}, Probabilidad: {probabilidad}")
 
         # Calcula la entropía de la fuente
         entropia = calcular_entropia(probabilidades, r)
@@ -126,15 +139,6 @@ def procesar_archivo(input_file, output_file=None, N=None):
     else:
         print("El código NO puede ser compacto.")
         print(f"Suma de las probabilidades: {suma_probabilidades}")
-
-    if cumple_kraft and cumple_prefijo:
-        print(
-            "El código cumple con la inecuación de Kraft-McMillan y es instantáneo (no tiene prefijos)."
-        )
-    elif not cumple_kraft:
-        print("El código NO cumple con la inecuación de Kraft-McMillan.")
-    elif not cumple_prefijo:
-        print("El código NO es instantáneo: una palabra es prefijo de otra.")
 
 
 def main():
