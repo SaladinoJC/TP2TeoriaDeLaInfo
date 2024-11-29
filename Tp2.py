@@ -43,6 +43,8 @@ def calcular_longitud_media(probabilidades, longitudes):
 def calcular_probabilidades_compacto(longitudes, r):
     probabilidades = [r**-l for l in longitudes]
     sum_probabilidades = sum(probabilidades)
+    #print("la suma de probabilidades es")
+    #print(sum_probabilidades)
     return probabilidades, sum_probabilidades
 
 
@@ -68,6 +70,7 @@ def procesar_archivo(input_file, output_file=None, N=None):
         with open(input_file, "r") as f:
             contenido = f.read()
             print(f"Se leyó el archivo {input_file}.")
+            print("-------------------------")
     except FileNotFoundError:
         print(f"Error: No se pudo encontrar el archivo {input_file}.")
         sys.exit(1)
@@ -82,63 +85,67 @@ def procesar_archivo(input_file, output_file=None, N=None):
     # Obtiene las longitudes de las palabras
     longitudes = [len(palabra) for palabra in palabras]
     print(f"Longitudes de las palabras: {longitudes}")
+    print("-------------------------")
 
     # Verifica si cumple la inecuación de Kraft-McMillan usando el tamaño del alfabeto
     r = len(alfabeto_codigo)
     cumple_kraft = verificar_kraft_mcmillan(longitudes, r)
 
-    # Verifica la propiedad de prefijo
-    cumple_prefijo = verificar_prefijo(palabras)
-
-    # Si no cumple con Kraft-McMillan o la propiedad de prefijo, informar y terminar
-    if not cumple_kraft:
-        print("El código NO cumple con la inecuación de Kraft-McMillan. El código no es instantáneo.")
-        return
-
-    if not cumple_prefijo:
-        print("El código NO es instantáneo: una palabra es prefijo de otra.")
-        return
-
-    # Si el código es instantáneo, continuar con los cálculos
-    print("El código cumple con la inecuación de Kraft-McMillan y es instantáneo.")
-
-    # Determina si puede conformar un código compacto
-    probabilidades, suma_probabilidades = calcular_probabilidades_compacto(longitudes, r)
-
-    if math.isclose(suma_probabilidades, 1, rel_tol=1e-9):
-        print("El código puede ser compacto.")
+    if cumple_kraft:
+        # Verifica la propiedad de prefijo
+        cumple_prefijo = verificar_prefijo(palabras)
+        if cumple_prefijo:
+            print("Cumple con Kraft, entonces es unívocamente decodificable, y al cumplir también con la condición de 'No Prefijo', también es instantáneo.")
+            # Determina si puede conformar un código compacto
+            probabilidades, suma_probabilidades = calcular_probabilidades_compacto(longitudes, r)
+            if math.isclose(suma_probabilidades, 1, rel_tol=1e-9):
+                print("El código puede ser compacto.")
         
-        # Mostrar las probabilidades asociadas a cada palabra
-        print("Probabilidades asociadas a cada palabra:")
-        for palabra, probabilidad in zip(palabras, probabilidades):
-            print(f"Palabra: {palabra}, Probabilidad: {probabilidad}")
+                # Mostrar las probabilidades asociadas a cada palabra
+                print("-------------------------")
+                print("Probabilidades asociadas a cada palabra:")
+                for palabra, probabilidad in zip(palabras, probabilidades):
+                    print(f"Palabra: {palabra:<5} | Probabilidad: {probabilidad:.3f}")
+                print("-------------------------")
 
-        # Calcula la entropía de la fuente
-        entropia = calcular_entropia(probabilidades, r)
-        print(f"Entropía de la fuente: {entropia}")
+                # Calcula la entropía de la fuente
+                entropia = calcular_entropia(probabilidades, r)
+                print(f"Entropía de la fuente: {entropia:.3f}")
 
-        # Calcula la longitud media del código
-        longitud_media = calcular_longitud_media(probabilidades, longitudes)
-        print(f"Longitud media del código: {longitud_media}")
+                # Calcula la longitud media del código
+                longitud_media = calcular_longitud_media(probabilidades, longitudes)
+                print(f"Longitud media del código: {longitud_media:.3f}")
+                print("-------------------------")
 
-        # Genera un mensaje de N símbolos codificados si N
-        if N:
-            mensaje_aleatorio = generar_mensaje_aleatorio(palabras, probabilidades, N)
-            print(f"Mensaje generado aleatoriamente: {mensaje_aleatorio}")
+                # Genera un mensaje de N símbolos codificados si N
+                if N:
+                    mensaje_aleatorio = generar_mensaje_aleatorio(palabras, probabilidades, N)
+                    print(f"Mensaje generado aleatoriamente: {mensaje_aleatorio}")
 
-        # Si se proporciona un archivo de salida y se ha generado un mensaje aleatorio, escribe el mensaje en el archivo
-        if output_file and N:
-            try:
-                with open(output_file, "w") as f:
-                    f.write(mensaje_aleatorio)
-                print(f"Mensaje generado y guardado en '{output_file}'.")
-            except IOError:
-                print(f"Error: No se pudo escribir en el archivo {output_file}.")
-                sys.exit(1)
+                # Si se proporciona un archivo de salida y se ha generado un mensaje aleatorio, escribe el mensaje en el archivo
+                if output_file and N:
+                    try:
+                        with open(output_file, "w") as f:
+                            f.write(mensaje_aleatorio)
+                        print(f"Mensaje guardado en '{output_file}'.")
+                        print("-------------------------")
+                    except IOError:
+                        print(f"Error: No se pudo escribir en el archivo {output_file}.")
+                        sys.exit(1)
 
+            else:
+                print("El código NO puede ser compacto.")
+                print(f"Suma de las probabilidades: {suma_probabilidades}")
+            
+        else:
+            print("Cumple con Kraft, entonces es unívocamente decodificable, pero no cumple con la condición de No Prefijo, entonces no es instantáneo.")
     else:
-        print("El código NO puede ser compacto.")
-        print(f"Suma de las probabilidades: {suma_probabilidades}")
+        print("No cumple con Kraft y, por lo tanto, no es instantáneo.")
+            
+
+    
+
+    
 
 
 def main():
