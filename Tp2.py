@@ -95,7 +95,7 @@ def procesar_archivo(input_file, output_file=None, N=None):
         # Verifica la propiedad de prefijo
         cumple_prefijo = verificar_prefijo(palabras)
         if cumple_prefijo:
-            print("Cumple con Kraft, entonces es unívocamente decodificable, y al cumplir también con la condición de 'No Prefijo', también es instantáneo.")
+            print("Cumple con Kraft-McMillan, entonces es unívocamente decodificable, y al cumplir también con la condición de 'No Prefijo', también es instantáneo.")
             # Determina si puede conformar un código compacto
             probabilidades, suma_probabilidades = calcular_probabilidades_compacto(longitudes, r)
             if math.isclose(suma_probabilidades, 1, rel_tol=1e-9):
@@ -138,9 +138,9 @@ def procesar_archivo(input_file, output_file=None, N=None):
                 print(f"Suma de las probabilidades: {suma_probabilidades}")
             
         else:
-            print("Cumple con Kraft, entonces es unívocamente decodificable, pero no cumple con la condición de No Prefijo, entonces no es instantáneo.")
+            print("Cumple con Kraft-McMillan, entonces es unívocamente decodificable, pero no cumple con la condición de No Prefijo, entonces no es instantáneo.")
     else:
-        print("No cumple con Kraft y, por lo tanto, no es instantáneo.")
+        print("No cumple con Kraft-McMillan y, por lo tanto, no es instantáneo.")
             
 
     
